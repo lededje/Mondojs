@@ -18,8 +18,6 @@ const ENDPOINTS = {
 export {ENDPOINTS, API};
 export default class Mondo {
 
-	VERSION: number;
-
 	oath: Object;
 	token: Object;
 
