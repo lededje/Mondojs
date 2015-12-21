@@ -15,6 +15,7 @@ const ENDPOINTS = {
 	FEED: '/feed'
 };
 
+export {ENDPOINTS, API};
 export default class Mondo {
 
 	VERSION: number;
@@ -52,14 +53,14 @@ export default class Mondo {
 		;
 	}
 
-	expired () {
+	expired () : boolean {
 		if(_.isUndefined(token)) {
 			throw new Error('Token not found.');
 		}
 		return token.expired();
 	}
 
-	refresh () {
+	refresh () : Promise {
 
 		if(_.isUndefined(token)) {
 			throw new Error('Token not found.');
@@ -68,17 +69,17 @@ export default class Mondo {
 		return token.refresh();
 	}
 
-	revoke () {
+	revoke () : Promise{
 		console.warn('No revoke enpoint available.');
 		return new Promise().reject()
 		// token.revoke('refresh_token');
 	}
 
-	accounts () {
+	accounts () : Promise {
 		return this.oauth.api('GET', ENDPOINTS.ACCOUNTS, { access_token: this.token.token.access_token });
 	}
 
-	balance (accountId: string) {
+	balance (accountId: string) : Promise {
 
 		if(!_.isString(accountId)) {
 			throw new Error('Account id is require to lookup balance.');
@@ -89,12 +90,12 @@ export default class Mondo {
 		return this.oauth.api('GET', endpoint, { access_token: this.token.token.access_token });
 	}
 
-	transactions (accountId) {
+	transactions (accountId) : Promise {
 
 		return this.oauth.api('GET', ENDPOINTS.TRANSACTIONS, { access_token: this.token.token.access_token, account_id: accountId });
 	}
 
-	transaction (transactionId: string) {
+	transaction (transactionId: string) : Promise {
 
 		if(!_.isString(transactionId)) {
 			throw new Error('Transaction id is required to look up single transaction.');
@@ -105,7 +106,7 @@ export default class Mondo {
 		return this.oauth.api('GET', endpoint, { access_token: this.token.token.access_token });
 	}
 
-	annotate (transactionId: string, annotations: Object) {
+	annotate (transactionId: string, annotations: Object) : Promise {
 
 		if(!_.isString(transactionId) || _.isEmpty(annotations)) {
 			throw new Error('Transaction id is required to specify which transaction to annotate.');
@@ -122,7 +123,7 @@ export default class Mondo {
 		return this.oauth.api('PATCH', endpoint, _.extend({}, {access_token: this.token.token.access_token}, map));
 	}
 
-	feed (accountId: string, item: Object = {}) {
+	feed (accountId: string, item: Object = {}) : Promise {
 
 		const REQUIRED_KEYS = ['params[title]', 'params[image_url]'];
 

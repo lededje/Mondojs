@@ -2,11 +2,11 @@
   "name": "Mondojs",
   "version": "0.0.1",
   "description": "Javascript integrations for the Mondo API",
-  "main": "index.js",
+  "main": "dist/Mondo.js",
   "scripts": {
-    "test": "npm prune; flow; mocha",
-    "watch": "mocha --watch",
-    "build": "npm prune; flow; mocha; gulp"
+    "test": "npm prune; flow; mocha ./Mondo.spec.jsx --compilers js:babel-register --reporter nyan",
+    "watch": "mocha ./Mondo.spec.jsx --watch --compilers js:babel-register --reporter nyan",
+    "build": "npm prune; flow; mocha ./Mondo.spec.jsx --compilers js:babel-register --reporter nyan; gulp"
   },
   "author": "Miles Spoor",
   "dependencies": {
