@@ -17,12 +17,12 @@ const ENDPOINTS = {
 
 export default class Mondo {
 
-	VERSION: Number;
+	VERSION: number;
 
 	oath: Object;
 	token: Object;
 
-	constructor(clientId: String, clientSecret: String) {
+	constructor(clientId: string, clientSecret: string) {
 
 		if (!_.isString(clientId) || !_.isString(clientSecret)) {
 			throw new Error('Client id and client password must be defined for instance construction.');
@@ -38,7 +38,7 @@ export default class Mondo {
 
 	}
 
-	auth (username: String, password: String) : Promise {
+	auth (username: string, password: string) : Promise {
 
 		if (!_.isString(username) || !_.isString(password)) {
 			throw new Error('Username and password must be defined for authorization.');
@@ -78,15 +78,67 @@ export default class Mondo {
 		return this.oauth.api('GET', ENDPOINTS.ACCOUNTS, { access_token: this.token.token.access_token });
 	}
 
-	balance (accountId: String) {
+	balance (accountId: string) {
 
 		if(!_.isString(accountId)) {
 			throw new Error('Account id is require to lookup balance.');
 		}
 
-		let endpoint: String = _.template(ENDPOINTS.BALANCE)({accountId});
+		let endpoint: string = _.template(ENDPOINTS.BALANCE)({accountId});
 
 		return this.oauth.api('GET', endpoint, { access_token: this.token.token.access_token });
+	}
+
+	transactions (accountId) {
+
+		return this.oauth.api('GET', ENDPOINTS.TRANSACTIONS, { access_token: this.token.token.access_token, account_id: accountId });
+	}
+
+	transaction (transactionId: string) {
+
+		if(!_.isString(transactionId)) {
+			throw new Error('Transaction id is required to look up single transaction.');
+		}
+
+		let endpoint: string = _.template(ENDPOINTS.TRANSACTION)({transactionId});
+
+		return this.oauth.api('GET', endpoint, { access_token: this.token.token.access_token });
+	}
+
+	annotate (transactionId: string, annotations: Object) {
+
+		if(!_.isString(transactionId) || _.isEmpty(annotations)) {
+			throw new Error('Transaction id is required to specify which transaction to annotate.');
+		}
+
+		let endpoint: string = _.template(ENDPOINTS.TRANSACTION)({transactionId});
+
+		let map: Object = {};
+
+		_.forEach(annotations, (val, key) => {
+			map[`metadata[${key}]`] = val;
+		});
+
+		return this.oauth.api('PATCH', endpoint, _.extend({}, {access_token: this.token.token.access_token}, map));
+	}
+
+	feed (accountId: string, item: Object = {}) {
+
+		const REQUIRED_KEYS = ['params[title]', 'params[image_url]'];
+
+		if(_.every(REQUIRED_KEYS, _.hasOwnProperty, item) === false) {
+			throw new Error('Both title and image_url are required for a new feed item.');
+		}
+
+		let defaults: Object = {
+			type: 'basic'
+		}
+
+		let headers: Object = _.defaults(defaults, item);
+
+		headers.account_id = accountId;
+
+		return this.oauth.api('POST', ENDPOINTS.FEED, _.extend({}, {access_token: this.token.token.access_token}, headers));
 	}
 
 }

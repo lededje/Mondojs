@@ -24,7 +24,7 @@ gulp.task('default', () => {
 			},
 			module: {
 				loaders : [
-					{ test: /\.js?$/, include: path.resolve(__dirname, 'src'), exclude: /node_modules/, loader: 'babel-loader' },
+					{ test: /\.jsx?$/, include: path.resolve(__dirname, 'src'), exclude: /node_modules/, loader: 'babel-loader' },
 					{ test: /\.json$/, loader: "json-loader" }
 				]
 			}
