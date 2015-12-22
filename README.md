@@ -12,7 +12,7 @@ The Mondo API is still indev and unstable so install directly from Github. Might
 
 `bower install --save https://github.com/lededje/Mondojs`
 
-### Constructory Summary
+### Constructor Summary
 
 `new Mondo(clientId, clientSecret) ⇒ Object`
 
@@ -22,11 +22,11 @@ Constructs a new Mondo instance
 
 `oauth ⇒ Object`
 
-The OAuth instance that was created during construction. Is later used to perform authorised requests.
+The OAuth instance that was created during construction. Is later used to perform authorized requests.
 
 `token ⇒ Object`
 
-The token created with you use the auth method. Used to authorise subsequent requests to the API.
+The token created with you use the auth method. Used to authorize subsequent requests to the API.
 
 ### Method Summary
 
@@ -69,4 +69,4 @@ Attaches annotations to transactions. Requires transaction ids from the transact
 
 `feed(acountId: string, item: Object) ⇒ Promise`
 
-Attaches posts to a users feed. Item contains specific paramters. See below.
+Attaches posts to a users feed. Item contains specific parameters. See below.
