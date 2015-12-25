@@ -16,25 +16,33 @@ const ENDPOINTS = {
 };
 
 export {ENDPOINTS, API};
+
 export default class Mondo {
 
 	oath: Object;
 	token: Object;
 
-	constructor(clientId: string, clientSecret: string) {
+	constructor(clientId: string, clientSecret: string, api: string = API) {
 
 		if (!_.isString(clientId) || !_.isString(clientSecret)) {
 			throw new Error('Client id and client password must be defined for instance construction.');
 		}
 
-		this.oauth = oauth2({
+		this.oauth2 = oauth2;
+
+		this.__oauthSet();
+
+		this.oauth = this.oauth2({
 			clientID: clientId,
 			clientSecret: clientSecret,
-			site: API,
-			tokenPath: API+ENDPOINTS.AUTHENTICATION.OAUTH2,
-			authorizationPath: API+ENDPOINTS.AUTHENTICATION.OAUTH2
+			site: api,
+			tokenPath: api+ENDPOINTS.AUTHENTICATION.OAUTH2,
+			authorizationPath: api+ENDPOINTS.AUTHENTICATION.OAUTH2
 		});
+	}
 
+	__oauthSet () {
+		// This is for testing purposes. Oath2 is not easily shim-able as it keeps a lot of it's internals private.
 	}
 
 	auth (username: string, password: string) : Promise {
@@ -52,32 +60,46 @@ export default class Mondo {
 	}
 
 	expired () : boolean {
-		if(_.isUndefined(token)) {
+		if(_.isUndefined(this.token)) {
 			throw new Error('Token not found.');
 		}
-		return token.expired();
+		return this.token.expired();
 	}
 
 	refresh () : Promise {
 
-		if(_.isUndefined(token)) {
+		if(_.isUndefined(this.token)) {
 			throw new Error('Token not found.');
 		}
 
-		return token.refresh();
+		return this.token.refresh();
 	}
 
-	revoke () : Promise{
+	revoke () : Promise {
+
+		if(_.isUndefined(this.token)) {
+			throw new Error('Token not found.');
+		}
+
 		console.warn('No revoke enpoint available.');
 		return new Promise().reject()
 		// token.revoke('refresh_token');
 	}
 
 	accounts () : Promise {
+
+		if(_.isUndefined(this.token)) {
+			throw new Error('Token not found.');
+		}
+
 		return this.oauth.api('GET', ENDPOINTS.ACCOUNTS, { access_token: this.token.token.access_token });
 	}
 
 	balance (accountId: string) : Promise {
+
+		if(_.isUndefined(this.token)) {
+			throw new Error('Token not found.');
+		}
 
 		if(!_.isString(accountId)) {
 			throw new Error('Account id is require to lookup balance.');
@@ -90,10 +112,18 @@ export default class Mondo {
 
 	transactions (accountId) : Promise {
 
+		if(_.isUndefined(this.token)) {
+			throw new Error('Token not found.');
+		}
+
 		return this.oauth.api('GET', ENDPOINTS.TRANSACTIONS, { access_token: this.token.token.access_token, account_id: accountId });
 	}
 
 	transaction (transactionId: string) : Promise {
+
+		if(_.isUndefined(this.token)) {
+			throw new Error('Token not found.');
+		}
 
 		if(!_.isString(transactionId)) {
 			throw new Error('Transaction id is required to look up single transaction.');
