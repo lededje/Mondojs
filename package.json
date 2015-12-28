@@ -32,8 +32,8 @@
     "moment": "^2.10.6",
     "nock": "^3.6.0",
     "nock-github-oauth": "^1.1.0",
-    "sinon": "^1.17.2",
     "promise": "^7.0.4",
+    "sinon": "^1.17.2",
     "webpack-stream": "^3.0.1"
   }
 }
