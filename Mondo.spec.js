@@ -8,14 +8,9 @@ import moment from 'Moment'
 import Promise from 'promise';
 import config from './config';
 
-
 import './nocks.js';
 
-const USERNAME = 'johndoe@example.com';
-const PASSWORD = 'password';
-
-let mondo;
-let clock;
+let mondo, clock;
 
 before(() => {
 	// Clear terminal between each test.
@@ -24,7 +19,6 @@ before(() => {
 
 	// Don't make any real remote requests.
 	nock.disableNetConnect();
-
 });
 
 after(() => {
@@ -105,30 +99,30 @@ describe('Mondo', () => {
 			mondo = new Mondo(config.CLIENT_ID, config.CLIENT_SECRET);
 		});
 
-		it('should throw an error if you don\'t provide a username and string', () => {
+		it('should throw an error if you don\'t provide a username and password', () => {
 
 			expect(mondo.auth).to.throw(Error);
-			expect(mondo.auth.bind(mondo, USERNAME, PASSWORD)).to.not.throw(Error);
+			expect(mondo.auth.bind(mondo, config.USERNAME, config.PASSWORD)).to.not.throw(Error);
 		});
 
 		it('should request a token with the username and password provided', () => {
 
 			let stub = sinon.stub(mondo.oauth.password, 'getToken', function ({username, password}) {
-				expect(username).to.equal(USERNAME);
-				expect(password).to.equal(PASSWORD);
+				expect(username).to.equal(config.USERNAME);
+				expect(password).to.equal(config.PASSWORD);
 
 				return new Promise((resolve) => {
 					resolve();
 				})
 			});
 
-			mondo.auth(USERNAME, PASSWORD);
+			mondo.auth(config.USERNAME, config.PASSWORD);
 
 		});
 
 		it('should store successful token requests on the instance', (done) => {
 
-			mondo.auth(USERNAME, PASSWORD).then(function (token) {
+			mondo.auth(config.USERNAME, config.PASSWORD).then(function (token) {
 
 				expect(mondo.token.token.access_token).to.equal(config.ACCESS_TOKEN);
 				expect(mondo.token.token.client_id).to.equal(config.CLIENT_ID);
@@ -137,18 +131,12 @@ describe('Mondo', () => {
 				expect(mondo.token.token.user_id).to.equal(config.USER_ID);
 
 				// due to it's async nature, this may be 1 millisecond out
-				// so testing between two values instead of one.
-				expect(mondo.token.token.expires_at.getTime()).to.be.within(moment().add(config.EXPIRES_IN, 'seconds').toDate().getTime()-1, moment().add(config.EXPIRES_IN, 'seconds').toDate().getTime()+1);
+				// so testing between two values instead of one with a fairly
+				// high tolerance.
+				expect(mondo.token.token.expires_at.getTime()).to.be.within(moment().add(config.EXPIRES_IN, 'seconds').toDate().getTime()-5, moment().add(config.EXPIRES_IN, 'seconds').toDate().getTime()+5);
 
 				done();
 			});
-
-		});
-
-		it('should return a promise', () => {
-			let mondo = new Mondo(config.CLIENT_ID, config.CLIENT_SECRET);
-
-			expect(mondo.auth(USERNAME, PASSWORD).then).to.exist;
 
 		});
 
@@ -173,13 +161,13 @@ describe('Mondo', () => {
 		 */
 		it('should return whether or not the token is expired', (done) => {
 
-			mondo.auth(USERNAME, PASSWORD).then(function() {
+			mondo.auth(config.USERNAME, config.PASSWORD).then(function() {
 
 				expect(mondo.expired()).to.be.false;
 
 				clock = sinon.useFakeTimers();
 
-				mondo.auth(USERNAME, PASSWORD).then(function(){
+				mondo.auth(config.USERNAME, config.PASSWORD).then(function(){
 
 					clock.tick((config.EXPIRES_IN+1)*1000);
 
@@ -205,12 +193,6 @@ describe('Mondo', () => {
 			expect(mondo.refresh).to.throw(Error);
 		});
 
-		it('should return a promise', (done) => {
-			mondo.auth(USERNAME, PASSWORD).then(() => {
-				expect(mondo.refresh().then).to.be.defined;
-				done();
-			});
-		});
 	});
 
 	// Not yet implemented server side.
@@ -224,8 +206,32 @@ describe('Mondo', () => {
 			expect(mondo.revoke).to.throw(Error);
 		});
 
-		it('should revoke both the access_token and the refresh_token');
-		it('should return a promise')
+		it('should trigger a console warn when using revoke', () => {
+
+			let stub = sinon.stub(console, 'warn', () => {});
+
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
+				mondo.revoke();
+
+				expect(stub.calledOnce).to.be.true;
+
+				stub.restore();
+			});
+		});
+
+		it('should always return a rejected promise', (done) => {
+
+			let stub = sinon.stub(console, 'warn', () => {});
+
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
+				mondo.revoke().catch(() => {
+					done();
+					stub.restore();
+				});
+			});
+		});
+
+		// it('should revoke both the access_token and the refresh_token');
 	});
 
 	describe('accounts', () => {
@@ -249,16 +255,11 @@ describe('Mondo', () => {
 				done();
 			});
 
-			mondo.auth(USERNAME, PASSWORD).then(() => {
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
 				mondo.accounts();
 			});
 		});
 
-		it('should return a promise', () => {
-			mondo.auth(USERNAME, PASSWORD).then(() => {
-				expect(mondo.accounts().then).to.exist;
-			});
-		});
 	});
 
 	describe('balance', () => {
@@ -273,7 +274,7 @@ describe('Mondo', () => {
 
 		it('should throw an error if an account id isn\'t passed', () => {
 
-			mondo.auth(USERNAME, PASSWORD).then(() => {
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
 				expect(mondo.balance).to.throw(Error);
 			});
 
@@ -293,16 +294,10 @@ describe('Mondo', () => {
 				done();
 			});
 
-			mondo.auth(USERNAME, PASSWORD).then(() => {
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
 				mondo.balance(config.ACCOUNT_ID)
 			});
 
-		});
-
-		it('should return a promise', () => {
-			mondo.auth(USERNAME, PASSWORD).then(() => {
-				expect(mondo.balance(config.ACCOUNT_ID).then).to.exist;
-			});
 		});
 
 	});
@@ -317,7 +312,7 @@ describe('Mondo', () => {
 			expect(mondo.transactions.bind(this, config.TRANSACTION_ID)).to.throw(Error);
 		});
 		it('should throw an error if no account id is provided', () => {
-			mondo.auth(USERNAME, PASSWORD).then(() => {
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
 				expect(mondo.transactions).to.throw(Error);
 			});
 		})
@@ -333,15 +328,10 @@ describe('Mondo', () => {
 				done();
 			});
 
-			mondo.auth(USERNAME, PASSWORD).then(() => {
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
 				mondo.transactions(config.ACCOUNT_ID)
 			});
 
-		});
-		it('should return a promise', () => {
-			mondo.auth(USERNAME, PASSWORD).then(() => {
-				expect(mondo.transactions(config.ACCOUNT_ID).then).to.exist;
-			});
 		});
 
 	});
@@ -356,7 +346,7 @@ describe('Mondo', () => {
 			expect(mondo.transaction.bind(mondo, config.TRANSACTION_ID)).to.throw(Error);
 		});
 		it('should throw an error if no transaction id is provided', () => {
-			mondo.auth(USERNAME, PASSWORD).then(() => {
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
 				expect(mondo.transaction).to.throw(Error)
 			});
 		});
@@ -372,15 +362,10 @@ describe('Mondo', () => {
 
 			});
 
-			mondo.auth(USERNAME, PASSWORD).then(() => {
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
 				mondo.transaction(config.TRANSACTION_ID);
 			});
 
-		});
-		it('should return a promise', () => {
-			mondo.auth(USERNAME, PASSWORD).then(() => {
-				expect(mondo.transaction(config.TRANSACTION_ID).then).to.exist;
-			});
 		});
 
 	});
@@ -397,7 +382,7 @@ describe('Mondo', () => {
 
 		it('should throw an error if no transaction id is provided', () => {
 
-			mondo.auth(USERNAME, PASSWORD).then(() => {
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
 
 				expect(mondo.annotate).to.throw(Error);
 				expect(mondo.annotate.bind(mondo, null, {
@@ -410,7 +395,7 @@ describe('Mondo', () => {
 
 		it('should throw an error if no annotation hash is provided', () => {
 
-			mondo.auth(USERNAME, PASSWORD).then(() => {
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
 
 				expect(mondo.annotate).to.throw(Error);
 				expect(mondo.annotate.bind(mondo, config.TRANSACTION_ID, null)).to.throw(Error);
@@ -429,20 +414,12 @@ describe('Mondo', () => {
 				});
 			});
 
-			mondo.auth(USERNAME, PASSWORD).then(() => {
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
 				mondo.annotate(config.TRANSACTION_ID, {
 					lorem: 'ipsum'
 				})
 			});
 
-		});
-
-		it('should return a promise', () => {
-			mondo.auth(USERNAME, PASSWORD).then(() => {
-				expect(mondo.annotate(config.TRANSACTION_ID, {
-					lorem: 'ipsum'
-				}).then).to.exist;
-			});
 		});
 
 	});
@@ -457,17 +434,61 @@ describe('Mondo', () => {
 			expect(mondo.feed).to.throw(Error);
 		});
 
-		it('should throw an error if no id is provided');
-		it('should throw an error if no annotation hash is provided')
-		it('should throw an error the annotation hash donesn\'t contain the required fields')
-		it('should post the transaction endpoint with the instances\' token and provided annotation hash in correctly formed headers');
-		it('should return a promise', () => {
-			mondo.auth(USERNAME, PASSWORD).then(() => {
-				expect(mondo.feed(config.ACCOUNT_ID, {
-					'params[title]': 'Test: lorem ipsum',
+		it('should throw an error if no account id is provided', (done) => {
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
+				expect(mondo.feed.bind(mondo, null, {
+					'params[title]': 'Test, lorem ipsum',
 					'params[image_url]': 'https://www.cloudbees.com/sites/default/files/blogger_importer/s1600/jenkinsLogo1.png'
-				}).then).to.exist;
+				})).to.throw(Error);
+
+				done()
 			});
+		});
+
+		it('should throw an error if no annotation hash is provided', () => {
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
+				expect(mondo.feed.bind(mondo, config.ACCOUNT_ID)).to.throw(Error);
+			});
+		})
+
+		it('should throw an error the annotation hash donesn\'t contain the required fields', (done) => {
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
+				expect(mondo.feed.bind(mondo, config.ACCOUNT_ID), {
+					'params[title]': 'Test, lorem ipsum',
+				}).to.throw(Error);
+
+				expect(mondo.feed.bind(mondo, config.ACCOUNT_ID), {
+					'params[image_url]': 'Test, lorem ipsum',
+				}).to.throw(Error);
+
+				done()
+			});
+		})
+
+		it('should post the feed endpoint with the instances\' token and provided hash in correctly formed headers', (done) => {
+
+			let title = 'Lorem';
+			let imageUrl = 'https://example.com/cat.gif';
+
+			let stub = sinon.stub(mondo.oauth, 'api', (method, endpoint, options) => {
+
+				expect(method).to.equal('POST');
+				expect(endpoint).to.equal(ENDPOINTS.FEED);
+				expect(options.access_token).to.equal(config.ACCESS_TOKEN)
+				expect(options['params[title]']).to.equal(title)
+				expect(options['params[image_url]']).to.equal(imageUrl)
+
+				done();
+
+			});
+
+			mondo.auth(config.USERNAME, config.PASSWORD).then(() => {
+				mondo.feed(config.ACCOUNT_ID, {
+					'params[title]': title,
+					'params[image_url]': imageUrl
+				})
+			});
+
 		});
 
 	});

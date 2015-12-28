@@ -7,5 +7,8 @@ export default {
 	USER_ID: 'user_xxxxxx',
 	ACCOUNT_ID: 'dddddd',
 	EXPIRES_IN: 172799,
-	TRANSACTION_ID: 'eeeeee'
+	TRANSACTION_ID: 'eeeeee',
+
+	USERNAME: 'johndoe@example.com',
+	PASSWORD: 'password'
 }

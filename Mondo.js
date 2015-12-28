@@ -60,6 +60,7 @@ export default class Mondo {
 	}
 
 	expired () : boolean {
+
 		if(_.isUndefined(this.token)) {
 			throw new Error('Token not found.');
 		}
@@ -82,7 +83,9 @@ export default class Mondo {
 		}
 
 		console.warn('No revoke enpoint available.');
-		return new Promise().reject()
+		return new Promise((resolve: Function, reject: Function) => {
+			reject();
+		})
 		// token.revoke('refresh_token');
 	}
 
@@ -153,10 +156,18 @@ export default class Mondo {
 
 	feed (accountId: string, item: Object = {}) : Promise {
 
+		if(_.isUndefined(this.token)) {
+			throw new Error('Token not found.');
+		}
+
 		const REQUIRED_KEYS = ['params[title]', 'params[image_url]'];
 
 		if(_.every(REQUIRED_KEYS, _.hasOwnProperty, item) === false) {
 			throw new Error('Both title and image_url are required for a new feed item.');
+		}
+
+		if(_.isString(accountId) === false) {
+			throw new Error('An account id is required to add items to it\'s feed');
 		}
 
 		let defaults: Object = {
