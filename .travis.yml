@@ -1,8 +1,8 @@
 language: node_js
 
 before_script:
-	- npm install -g flow-bin
+  - npm install -g flow-bin
 
 cache:
-	directories:
-		- node_modules
+  directories:
+    - node_modules
