@@ -4,9 +4,9 @@
   "description": "Javascript integrations for the Mondo API",
   "main": "dist/Mondo.js",
   "scripts": {
-    "test": "npm prune; flow; mocha ./Mondo.spec.js --compilers js:babel-register --reporter dot",
-    "watch": "mocha ./Mondo.spec.js --watch --compilers js:babel-register --reporter dot",
-    "build": "npm prune; flow; mocha ./Mondo.spec.js --compilers js:babel-register --reporter dot; gulp"
+    "test": "mocha ./Mondo.spec.js --compilers js:babel-register --reporter list",
+    "watch": "mocha ./Mondo.spec.js --watch --compilers js:babel-register --reporter list",
+    "build": "mocha ./Mondo.spec.js --compilers js:babel-register --reporter list; gulp"
   },
   "author": "Miles Spoor",
   "dependencies": {

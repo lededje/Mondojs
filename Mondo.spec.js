@@ -111,7 +111,7 @@ describe('Mondo', () => {
 				expect(username).to.equal(config.USERNAME);
 				expect(password).to.equal(config.PASSWORD);
 
-				return new Promise((resolve) => {
+				return new Promise((resolve, reject) => {
 					resolve();
 				})
 			});
