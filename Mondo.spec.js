@@ -4,7 +4,7 @@ import chai, {expect} from 'chai';
 import sinon from 'sinon';
 import _ from 'lodash';
 import nock from 'nock';
-import moment from 'Moment'
+import moment from 'moment'
 import Promise from 'promise';
 import config from './config';
 
