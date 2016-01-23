@@ -12,7 +12,9 @@ const ENDPOINTS = {
 	BALANCE: '/balance?account_id=<%= accountId %>',
 	TRANSACTION: '/transactions/<%= transactionId %>',
 	TRANSACTIONS: '/transactions',
-	FEED: '/feed'
+	FEED: '/feed',
+	CARDS: '/card/list?account_id=<%= accountId %>',
+	TOGGLE: '/card/toggle?card_id=<%= cardId %>&status=<%= status %>'
 };
 
 export {ENDPOINTS, API};
@@ -176,6 +178,37 @@ export default class Mondo {
 		headers.account_id = accountId;
 
 		return this.oauth.api('POST', ENDPOINTS.FEED, _.extend({}, {access_token: this.token.token.access_token}, headers));
+	}
+
+	cards (accountId) {
+		if (_.isUndefined(accountId)) {
+			throw new Error('Account id is required to list cards.');
+		}
+
+		let endpoint = _.template(ENDPOINTS.CARDS)({accountId});
+
+
+		console.log(endpoint);
+
+		return this.oauth.api('GET', endpoint, { access_token: this.token.token.access_token });
+
+	}
+
+	toggle (cardId, status) {
+
+		if (_.isUndefined(cardId)) {
+			throw new Error('Card id is required to toggle the state of a card');
+		}
+
+		if(!/^(ACTIVE|INACTIVE)$/.test(status)) {
+			throw new Error('Status must be either ACTIVE or INACTIVE');
+		}
+
+		let endpoint = _.template(ENDPOINTS.TOGGLE)({cardId, status});
+
+		return this.oauth.api('PUT', endpoint, { access_token: this.token.token.access_token });
+
+
 	}
 
 }
