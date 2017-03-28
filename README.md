@@ -1,5 +1,7 @@
 # Unofficial MondoJS
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/lededje/Mondojs.svg)](https://greenkeeper.io/)
+
 A light weight Mondo library.
 
 Version 0.1.0 Alpha - The Mondo API is currently under active development and breaking changes may be introduced.
