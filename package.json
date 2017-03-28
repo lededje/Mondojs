@@ -10,7 +10,7 @@
   },
   "author": "Miles Spoor",
   "dependencies": {
-    "simple-oauth2": "^0.3.0"
+    "simple-oauth2": "^1.1.0"
   },
   "devDependencies": {
     "babel-cli": "^6.3.17",
@@ -22,18 +22,18 @@
     "chai": "^3.4.1",
     "gulp": "^3.9.0",
     "gulp-babel": "^6.1.1",
-    "gulp-debug": "^2.1.2",
-    "gulp-mocha": "^2.2.0",
+    "gulp-debug": "^3.1.0",
+    "gulp-mocha": "^4.1.0",
     "gulp-rename": "^1.2.2",
     "gulp-webpack": "^1.5.0",
-    "gulp-zip": "^3.0.2",
-    "lodash": "^3.10.1",
-    "mocha": "^2.3.4",
+    "gulp-zip": "^4.0.0",
+    "lodash": "^4.17.4",
+    "mocha": "^3.2.0",
     "moment": "^2.10.6",
-    "nock": "^3.6.0",
+    "nock": "^9.0.9",
     "nock-github-oauth": "^1.1.0",
     "promise": "^7.0.4",
-    "sinon": "^1.17.2",
+    "sinon": "^2.1.0",
     "webpack-stream": "^3.0.1"
   }
 }
